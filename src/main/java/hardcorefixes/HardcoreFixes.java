@@ -5,7 +5,7 @@ import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.network.NetworkCheckHandler;
 import cpw.mods.fml.relauncher.Side;
 
-import hardcorefixes.handlers.TickHandler;
+import hardcorefixes.handlers.FMLHandler;
 import hardcorefixes.reference.Reference;
 import hardcorefixes.handlers.ThreadingHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -43,7 +43,7 @@ public class HardcoreFixes
         metadata = hardcorefixes.reference.Metadata.init(metadata);
         if (event.getSide() == Side.CLIENT)
         {
-            FMLCommonHandler.instance().bus().register(new TickHandler());
+            FMLCommonHandler.instance().bus().register(new FMLHandler());
             MinecraftForge.EVENT_BUS.register(new ThreadingHandler());
             config(event.getSuggestedConfigurationFile());
         }

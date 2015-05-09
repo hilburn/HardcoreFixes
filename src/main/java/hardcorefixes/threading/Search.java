@@ -59,48 +59,61 @@ public class Search implements Runnable
 
     public static void setItems()
     {
-        List<ItemStack> stacks = new ArrayList<ItemStack>();
-        for (Object anItemRegistry : Item.itemRegistry)
+        if (searchItems.isEmpty())
         {
-            try
+            List<ItemStack> stacks = new ArrayList<ItemStack>();
+            for (Object anItemRegistry : Item.itemRegistry)
             {
-                Item item = (Item)anItemRegistry;
-                if (HardcoreFixes.hideFluidBlocks && item instanceof ItemBlock)
+                try
                 {
-                    ItemBlock itemBlock = (ItemBlock)item;
-                    if (itemBlock.field_150939_a == Blocks.lava || itemBlock.field_150939_a == Blocks.water || itemBlock.field_150939_a instanceof BlockLiquid || itemBlock.field_150939_a instanceof IFluidBlock) continue;
+                    Item item = (Item)anItemRegistry;
+                    if (HardcoreFixes.hideFluidBlocks && item instanceof ItemBlock)
+                    {
+                        ItemBlock itemBlock = (ItemBlock)item;
+                        if (itemBlock.field_150939_a == Blocks.lava || itemBlock.field_150939_a == Blocks.water || itemBlock.field_150939_a instanceof BlockLiquid || itemBlock.field_150939_a instanceof IFluidBlock)
+                            continue;
+                    }
+                    item.getSubItems(item, item.getCreativeTab(), stacks);
+                } catch (Exception ignore)
+                {
                 }
-                item.getSubItems(item, item.getCreativeTab(), stacks);
             }
-            catch (Exception ignore){}
-        }
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-        for (ItemStack stack : stacks)
-        {
-            try
+            EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+            for (ItemStack stack : stacks)
             {
-                List tooltipList = stack.getTooltip(player, false);
-                List advTooltipList = stack.getTooltip(player, true);
-                String searchString = "";
-                for (Object string : tooltipList)
+                try
                 {
-                    if (string != null)
-                        searchString += string + "\n";
-                }
-                String advSearchString = "";
-                for (Object string : advTooltipList)
+                    List tooltipList = stack.getTooltip(player, false);
+                    List advTooltipList = stack.getTooltip(player, true);
+                    String searchString = "";
+                    for (Object string : tooltipList)
+                    {
+                        if (string != null)
+                            searchString += string + "\n";
+                    }
+                    String advSearchString = "";
+                    for (Object string : advTooltipList)
+                    {
+                        if (string != null)
+                            advSearchString += string + "\n";
+                    }
+                    searchItems.add(new SearchEntry(searchString, advSearchString, getItemElement(stack)));
+                } catch (Throwable ignore)
                 {
-                    if (string != null)
-                        advSearchString += string + "\n";
                 }
-                searchItems.add(new SearchEntry(searchString, advSearchString, getItemElement(stack)));
-            } catch (Throwable ignore) {}
+            }
+            for (Fluid fluid : FluidRegistry.getRegisteredFluids().values())
+            {
+                String search = fluid.getLocalizedName();
+                searchFluids.add(new SearchEntry(search, search, getFluidElement(fluid)));
+            }
         }
-        for (Fluid fluid : FluidRegistry.getRegisteredFluids().values())
-        {
-            String search = fluid.getLocalizedName();
-            searchFluids.add(new SearchEntry(search, search, getFluidElement(fluid)));
-        }
+    }
+
+    public static void clear()
+    {
+        searchFluids.clear();
+        searchItems.clear();
     }
 
     public static GuiEditMenuItem.ElementItem getItemElement(ItemStack stack)
